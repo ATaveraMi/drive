@@ -165,7 +165,8 @@ export function DriveUI() {
 
   // Navigate to a folder
   const navigateToFolder = (folderId: string) => {
-    const folder = initialData[folderId];
+    const folder = initialData[folderId] as FolderItem;
+    if (!folder) return;
 
     // Update path
     if (folderId === "root") {
@@ -175,10 +176,8 @@ export function DriveUI() {
       const existingIndex = path.findIndex((p) => p.id === folderId);
 
       if (existingIndex >= 0) {
-        // If we're clicking a folder in the breadcrumb, trim the path
         setPath(path.slice(0, existingIndex + 1));
       } else {
-        // Add to the path
         setPath([...path, { id: folderId, name: folder.name }]);
       }
     }
@@ -193,9 +192,9 @@ export function DriveUI() {
   };
 
   // Get current folder contents
-  const getCurrentFolderContents = () => {
+  const getCurrentFolderContents = (): (DriveItem & { id: string })[] => {
     const folder = initialData[currentFolder];
-    if (!folder || !folder.children) return [];
+    if (!folder?.children) return [];
 
     return folder.children.map((id) => ({
       id,
