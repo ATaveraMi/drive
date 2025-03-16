@@ -1,12 +1,20 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { File, FileText, Folder, Grid, List, Search, Upload } from "lucide-react"
+import { useState } from "react";
+import {
+  File,
+  FileText,
+  Folder,
+  Grid,
+  List,
+  Search,
+  Upload,
+} from "lucide-react";
 
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -15,17 +23,37 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "~/components/ui/dialog"
+} from "~/components/ui/dialog";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbSeparator,
-} from "~/components/ui/breadcrumb"
+} from "~/components/ui/breadcrumb";
+
+// Add these types at the top of the file
+type FileType = "document" | "spreadsheet" | "presentation" | "pdf" | "archive";
+
+interface FileItem {
+  type: "file";
+  name: string;
+  size: string;
+  modified: string;
+  fileType: FileType;
+}
+
+interface FolderItem {
+  type: "folder";
+  name: string;
+  children: string[];
+}
+
+type DriveItem = FileItem | FolderItem;
+type DriveData = Record<string, DriveItem>;
 
 // Mock data structure
-const initialData = {
+const initialData: DriveData = {
   root: {
     type: "folder",
     name: "My Drive",
@@ -109,93 +137,99 @@ const initialData = {
     modified: "Feb 8, 2023",
     fileType: "archive",
   },
-}
+};
 
 export function DriveUI() {
-  const [currentFolder, setCurrentFolder] = useState("root")
-  const [path, setPath] = useState([{ id: "root", name: "My Drive" }])
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list")
-  const [uploadOpen, setUploadOpen] = useState(false)
+  const [currentFolder, setCurrentFolder] = useState("root");
+  const [path, setPath] = useState([{ id: "root", name: "My Drive" }]);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   // Get file icon based on file type
   const getFileIcon = (fileType: string) => {
     switch (fileType) {
       case "document":
-        return <FileText className="h-8 w-8 text-blue-500" />
+        return <FileText className="h-8 w-8 text-blue-500" />;
       case "spreadsheet":
-        return <FileText className="h-8 w-8 text-green-500" />
+        return <FileText className="h-8 w-8 text-green-500" />;
       case "presentation":
-        return <FileText className="h-8 w-8 text-orange-500" />
+        return <FileText className="h-8 w-8 text-orange-500" />;
       case "pdf":
-        return <FileText className="h-8 w-8 text-red-500" />
+        return <FileText className="h-8 w-8 text-red-500" />;
       case "archive":
-        return <FileText className="h-8 w-8 text-purple-500" />
+        return <FileText className="h-8 w-8 text-purple-500" />;
       default:
-        return <File className="h-8 w-8 text-gray-500" />
+        return <File className="h-8 w-8 text-gray-500" />;
     }
-  }
+  };
 
   // Navigate to a folder
   const navigateToFolder = (folderId: string) => {
-    const folder = initialData[folderId]
+    const folder = initialData[folderId];
 
     // Update path
     if (folderId === "root") {
-      setPath([{ id: "root", name: "My Drive" }])
+      setPath([{ id: "root", name: "My Drive" }]);
     } else {
       // Find where in the path we are
-      const existingIndex = path.findIndex((p) => p.id === folderId)
+      const existingIndex = path.findIndex((p) => p.id === folderId);
 
       if (existingIndex >= 0) {
         // If we're clicking a folder in the breadcrumb, trim the path
-        setPath(path.slice(0, existingIndex + 1))
+        setPath(path.slice(0, existingIndex + 1));
       } else {
         // Add to the path
-        setPath([...path, { id: folderId, name: folder.name }])
+        setPath([...path, { id: folderId, name: folder.name }]);
       }
     }
 
-    setCurrentFolder(folderId)
-  }
+    setCurrentFolder(folderId);
+  };
 
   // Handle file click
   const handleFileClick = (fileId: string) => {
     // In a real app, this would open the file or download it
-    alert(`Opening file: ${initialData[fileId].name}`)
-  }
+    alert(`Opening file: ${initialData[fileId].name}`);
+  };
 
   // Get current folder contents
   const getCurrentFolderContents = () => {
-    const folder = initialData[currentFolder]
-    if (!folder || !folder.children) return []
+    const folder = initialData[currentFolder];
+    if (!folder || !folder.children) return [];
 
     return folder.children.map((id) => ({
       id,
       ...initialData[id],
-    }))
-  }
+    }));
+  };
 
   // Mock upload handler
   const handleUpload = (e: React.FormEvent) => {
-    e.preventDefault()
-    setUploadOpen(false)
-    alert("File upload simulated! In a real app, this would upload your files.")
-  }
+    e.preventDefault();
+    setUploadOpen(false);
+    alert(
+      "File upload simulated! In a real app, this would upload your files.",
+    );
+  };
 
-  const folderContents = getCurrentFolderContents()
+  const folderContents = getCurrentFolderContents();
 
   return (
     <div className="dark">
-      <div className="flex h-screen bg-background text-foreground">
+      <div className="bg-background text-foreground flex h-screen">
         {/* Main content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden">
           {/* Header */}
           <header className="border-b p-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center w-full max-w-md">
+              <div className="flex w-full max-w-md items-center">
                 <div className="relative w-full">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input type="search" placeholder="Search in Drive" className="w-full pl-9" />
+                  <Search className="text-muted-foreground absolute left-2.5 top-2.5 h-4 w-4" />
+                  <Input
+                    type="search"
+                    placeholder="Search in Drive"
+                    className="w-full pl-9"
+                  />
                 </div>
               </div>
 
@@ -227,10 +261,12 @@ export function DriveUI() {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Upload files</DialogTitle>
-                      <DialogDescription>Upload files to your current folder.</DialogDescription>
+                      <DialogDescription>
+                        Upload files to your current folder.
+                      </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleUpload}>
-                      <div className="grid w-full max-w-sm items-center gap-1.5 my-4">
+                      <div className="my-4 grid w-full max-w-sm items-center gap-1.5">
                         <Input id="file" type="file" multiple />
                       </div>
                       <DialogFooter>
@@ -244,12 +280,15 @@ export function DriveUI() {
           </header>
 
           {/* Breadcrumb */}
-          <div className="p-4 border-b">
+          <div className="border-b p-4">
             <Breadcrumb>
               <BreadcrumbList>
                 {path.map((item, index) => (
                   <BreadcrumbItem key={item.id}>
-                    <BreadcrumbLink onClick={() => navigateToFolder(item.id)} className="cursor-pointer">
+                    <BreadcrumbLink
+                      onClick={() => navigateToFolder(item.id)}
+                      className="cursor-pointer"
+                    >
                       {item.name}
                     </BreadcrumbLink>
                     {index < path.length - 1 && <BreadcrumbSeparator />}
@@ -262,52 +301,72 @@ export function DriveUI() {
           {/* File/Folder listing */}
           <main className="flex-1 overflow-auto p-4">
             {viewMode === "grid" ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {folderContents.map((item) => (
                   <div
                     key={item.id}
-                    onClick={() => (item.type === "folder" ? navigateToFolder(item.id) : handleFileClick(item.id))}
-                    className="border rounded-lg p-4 flex flex-col items-center cursor-pointer hover:bg-accent transition-colors"
+                    onClick={() =>
+                      item.type === "folder"
+                        ? navigateToFolder(item.id)
+                        : handleFileClick(item.id)
+                    }
+                    className="hover:bg-accent flex cursor-pointer flex-col items-center rounded-lg border p-4 transition-colors"
                   >
                     {item.type === "folder" ? (
-                      <Folder className="h-12 w-12 text-blue-500 mb-2" />
+                      <Folder className="mb-2 h-12 w-12 text-blue-500" />
                     ) : (
                       <div className="mb-2">{getFileIcon(item.fileType)}</div>
                     )}
-                    <div className="text-sm font-medium text-center truncate w-full">{item.name}</div>
-                    {item.type === "file" && <div className="text-xs text-muted-foreground mt-1">{item.size}</div>}
+                    <div className="w-full truncate text-center text-sm font-medium">
+                      {item.name}
+                    </div>
+                    {item.type === "file" && (
+                      <div className="text-muted-foreground mt-1 text-xs">
+                        {item.size}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="border rounded-lg overflow-hidden">
+              <div className="overflow-hidden rounded-lg border">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b bg-muted/50">
-                      <th className="text-left p-3 font-medium">Name</th>
-                      <th className="text-left p-3 font-medium hidden md:table-cell">Modified</th>
-                      <th className="text-left p-3 font-medium hidden sm:table-cell">Size</th>
+                    <tr className="bg-muted/50 border-b">
+                      <th className="p-3 text-left font-medium">Name</th>
+                      <th className="hidden p-3 text-left font-medium md:table-cell">
+                        Modified
+                      </th>
+                      <th className="hidden p-3 text-left font-medium sm:table-cell">
+                        Size
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {folderContents.map((item) => (
                       <tr
                         key={item.id}
-                        onClick={() => (item.type === "folder" ? navigateToFolder(item.id) : handleFileClick(item.id))}
-                        className="border-b cursor-pointer hover:bg-accent/50 transition-colors"
+                        onClick={() =>
+                          item.type === "folder"
+                            ? navigateToFolder(item.id)
+                            : handleFileClick(item.id)
+                        }
+                        className="hover:bg-accent/50 cursor-pointer border-b transition-colors"
                       >
-                        <td className="p-3 flex items-center gap-3">
+                        <td className="flex items-center gap-3 p-3">
                           {item.type === "folder" ? (
-                            <Folder className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                            <Folder className="h-5 w-5 flex-shrink-0 text-blue-500" />
                           ) : (
-                            <div className="flex-shrink-0">{getFileIcon(item.fileType)}</div>
+                            <div className="flex-shrink-0">
+                              {getFileIcon(item.fileType)}
+                            </div>
                           )}
                           <span className="truncate">{item.name}</span>
                         </td>
-                        <td className="p-3 text-muted-foreground hidden md:table-cell">
+                        <td className="text-muted-foreground hidden p-3 md:table-cell">
                           {item.type === "file" ? item.modified : "—"}
                         </td>
-                        <td className="p-3 text-muted-foreground hidden sm:table-cell">
+                        <td className="text-muted-foreground hidden p-3 sm:table-cell">
                           {item.type === "file" ? item.size : "—"}
                         </td>
                       </tr>
@@ -320,6 +379,5 @@ export function DriveUI() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
