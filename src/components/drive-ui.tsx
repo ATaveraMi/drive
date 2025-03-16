@@ -187,19 +187,24 @@ export function DriveUI() {
 
   // Handle file click
   const handleFileClick = (fileId: string) => {
-    // In a real app, this would open the file or download it
-    alert(`Opening file: ${initialData[fileId].name}`);
+    const file = initialData[fileId];
+    if (!file || file.type !== "file") return;
+
+    alert(`Opening file: ${file.name}`);
   };
 
   // Get current folder contents
   const getCurrentFolderContents = (): (DriveItem & { id: string })[] => {
     const folder = initialData[currentFolder];
-    if (!folder?.children) return [];
+    if (!folder || folder.type !== "folder") return [];
 
-    return folder.children.map((id) => ({
-      id,
-      ...initialData[id],
-    }));
+    return folder.children
+      .map((id) => {
+        const item = initialData[id];
+        if (!item) return [] as (DriveItem & { id: string })[];
+        return { id, ...item };
+      })
+      .flat();
   };
 
   // Mock upload handler
